@@ -13,7 +13,7 @@ class Ethrex < Formula
   end
 
   bottle do
-    root_url "https://github.com/lambdaclass/homebrew-tap/releases/download/v1.0.1/ethrex-v1.0.1-aarch64-apple-darwin.tar.gz"
+    root_url "https://github.com/lambdaclass/homebrew-tap/releases/download/v1.0.1"
     sha256 cellar: :any_skip_relocation, arm64_sonoma: "db6a82de601e785a1224e8f05f6586a97c0c2bacd4abb1c1c03f64623c1a2536"
   end
 
