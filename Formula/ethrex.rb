@@ -14,7 +14,7 @@ class Ethrex < Formula
 
   on_macos do
     if Hardware::CPU.arm?
-      url "https://github.com/lambdaclass/hombrew-tap/releases/download/v1.0.1/ethrex-v1.0.1-aarch64-apple-darwin.tar.gz"
+      url "https://github.com/lambdaclass/homebrew-tap/releases/download/v1.0.1/ethrex-v1.0.1-aarch64-apple-darwin.tar.gz"
       sha256 "db6a82de601e785a1224e8f05f6586a97c0c2bacd4abb1c1c03f64623c1a2536"
     end
   end
