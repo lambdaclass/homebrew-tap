@@ -2,15 +2,15 @@
 
 ## How do I install these formulae?
 
-`brew install lambdaclass/tap/<formula>`
+`brew install lambdaclass/tap/ethrex`
 
-Or `brew tap lambdaclass/tap` and then `brew install <formula>`.
+Or `brew tap lambdaclass/tap` and then `brew install ethrex`.
 
 Or, in a `brew bundle` `Brewfile`:
 
 ```ruby
 tap "lambdaclass/tap"
-brew "<formula>"
+brew "ethrex"
 ```
 
 ## Documentation
