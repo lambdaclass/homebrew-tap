@@ -14,7 +14,7 @@ class Ethrex < Formula
 
   bottle do
     root_url "https://github.com/lambdaclass/homebrew-tap/releases/download/v1.0.1"
-    sha256 cellar: :any_skip_relocation, arm64_sonoma: "e4f9e3ba0e5edd85f4f35c82709df5c052f6a18bb933b2e0ad7b8e1d85cdfc5c"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma: "8482aae86683cad83ea757b6f75e7df986f2b5f20d84d3d7157585994bf7f3ef"
   end
 
 #   on_macos do
