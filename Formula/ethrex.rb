@@ -1,8 +1,8 @@
 class Ethrex < Formula
   desc "Minimalist, fast and modular implementation of the Ethereum protocol in Rust"
   homepage "https://docs.ethrex.xyz/"
-  url "https://github.com/lambdaclass/ethrex/archive/refs/tags/v3.0.0.tar.gz"
-  sha256 "4d2bb5f425311da95a414a48dfd5661c4853a38a4dc9a7e7bc35e8599df9d6a4"
+  url "https://github.com/lambdaclass/ethrex/archive/refs/tags/v4.0.0.tar.gz"
+  sha256 "072b1dac6bee6446ba609f632867ddff8fc30376a3c4c22631be5d90a8263944"
   license "Apache-2.0"
 
   depends_on "rustup" => :build
@@ -13,8 +13,8 @@ class Ethrex < Formula
   end
 
   bottle do
-    root_url "https://github.com/lambdaclass/homebrew-tap/releases/download/v3.0.0"
-    sha256 cellar: :any_skip_relocation, arm64_sonoma: "94293033276112c65dae81c2735dd87205503129ba0ce6c7214782cd092eab2e"
+    root_url "https://github.com/lambdaclass/homebrew-tap/releases/download/v4.0.0"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma: "515ee708e94c6c7a87695b25d78539c4a8cc8d7a3ec808997a48f17141305cf9"
   end
 
 #   on_macos do
