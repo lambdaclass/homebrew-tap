@@ -5,8 +5,6 @@ class Ethrex < Formula
   sha256 "5428a023770fdc716768492269c7e31413543af0c6c2012f8b36687d102cacbd"
   license "Apache-2.0"
 
-  depends_on "rustup" => :build
-
   livecheck do
     url :stable
     regex(/^v([0-9]+\.[0-9]+\.[0-9]+)$/i)
@@ -17,23 +15,7 @@ class Ethrex < Formula
     sha256 cellar: :any_skip_relocation, arm64_sonoma: "a0024c012d298d33539be92fc2b1398342260b27d6f4a4f69f9d70b8dc4b2dde"
   end
 
-#   on_macos do
-#     if Hardware::CPU.arm?
-#       url "https://github.com/lambdaclass/homebrew-tap/releases/download/v1.0.1/ethrex-v1.0.1-aarch64-apple-darwin.tar.gz"
-#       sha256 "db6a82de601e785a1224e8f05f6586a97c0c2bacd4abb1c1c03f64623c1a2536"
-#     end
-#   end
-# 
-#   on_linux do
-#     if Hardware::CPU.arm?
-#       url "https://github.com/lambdaclass/homebrew-tap/releases/download/v1.0.1/ethrex-v1.0.1-aarch64-unknown-linux-gnu.tar.gz"
-#       sha256 "c3b7051834e406b2312164d8f8844630a4d3719bd251f6c9ee61537a7276379b"
-#     else
-#       url "https://github.com/lambdaclass/homebrew-tap/releases/download/v1.0.1/ethrex-v1.0.1-x86_64-unknown-linux-gnu.tar.gz"
-#       sha256 "810ece2ae12976d4aa97c8080ebc68bd2abeca3d6321958f4ee0f26e7b9ad2c0"
-#     end
-#   end
-    
+  depends_on "rustup" => :build
 
   def install
     system "rustup", "toolchain", "install", "1.91"
