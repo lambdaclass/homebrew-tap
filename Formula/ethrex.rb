@@ -2,7 +2,7 @@ class Ethrex < Formula
   desc "Minimalist, fast and modular implementation of the Ethereum protocol in Rust"
   homepage "https://docs.ethrex.xyz/"
   url "https://github.com/lambdaclass/ethrex/archive/refs/tags/v19.0.0.tar.gz"
-  sha256 "0f9a1c0f9c9f4124b4dc69fe7f0c668a04051539cdd3bc46cf673e1b83bc9b09"
+  sha256 "31c1c7be66b2ee4b2613d83e1d251c54cebbf643485c5d98b4b1d634aeacbd88"
   license "Apache-2.0"
 
   livecheck do
