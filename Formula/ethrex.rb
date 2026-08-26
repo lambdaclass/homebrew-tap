@@ -17,6 +17,15 @@ class Ethrex < Formula
 
   depends_on "rustup" => :build
 
+  on_linux do
+    # `reqwest` pulls in `native-tls`, which is backed by OpenSSL on Linux.
+    # `openssl-sys` locates it through `pkg-config`, so both the tool and the
+    # keg have to be declared for `PKG_CONFIG_PATH` to point at `openssl.pc`.
+    # macOS needs neither: there `native-tls` uses Security.framework.
+    depends_on "pkgconf" => :build
+    depends_on "openssl@3"
+  end
+
   def install
     system "rustup", "toolchain", "install", "1.93"
     system "cargo", "install", *std_cargo_args(path: "cmd/ethrex")
