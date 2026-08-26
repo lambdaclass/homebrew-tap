@@ -41,6 +41,23 @@ jobs:
       - run: brew test-bot --only-formulae
         if: github.event_name == 'pull_request'
 
+      # `brew test-bot` downgrades a failing step to a warning when the formula
+      # has no bottle for the current platform, and still exits 0. Every version
+      # bump hits that case, so a formula that does not build at all reports a
+      # green job. Turn those ignored failures back into a red job.
+      - name: Fail on ignored test-bot failures
+        if: ${{ !cancelled() && github.event_name == 'pull_request' }}
+        run: |
+          if [ ! -f steps_output.txt ]; then
+            echo "::error::brew test-bot wrote no steps_output.txt, cannot tell whether it ignored a failure"
+            exit 1
+          fi
+          cat steps_output.txt
+          if grep -q 'failed step' steps_output.txt; then
+            echo "::error::brew test-bot ignored a failing step, see the summary above"
+            exit 1
+          fi
+
       - name: Upload bottles as artifact
         if: always() && github.event_name == 'pull_request'
         uses: actions/upload-artifact@v4
