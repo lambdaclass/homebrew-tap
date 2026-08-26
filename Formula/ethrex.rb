@@ -31,7 +31,7 @@ class Ethrex < Formula
     system "cargo", "install", *std_cargo_args(path: "cmd/ethrex")
   end
 
-  # test do
-  #   assert_match "ethrex", shell_output("#{bin}/ethrex --version")
-  # end
+  test do
+    assert_match "ethrex/v#{version}", shell_output("#{bin}/ethrex --version")
+  end
 end

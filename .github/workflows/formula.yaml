@@ -1,0 +1,69 @@
+name: Formula CI
+
+# Installs the formula the two ways a user can hit it, so a broken release is
+# caught on the bump PR instead of by the first person to `brew upgrade`:
+#
+#  - from the bottle (--force-bottle): fails if the bottle URL 404s — i.e. the
+#    tap release with the attached bottle was not created before the PR merges —
+#    or if the bottle hash / layout is wrong.
+#  - from source (--build-from-source): fails if the source tarball hash is
+#    wrong or the declared Rust toolchain can no longer build the release —
+#    which is what every user without a matching bottle (Intel macs, older
+#    macOS) actually runs.
+#
+# Both jobs then run the built binary and `brew test`.
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  bottle:
+    name: Install from bottle
+    # arm64 + Sonoma: must match the formula's `arm64_sonoma` bottle tag, or
+    # brew refuses the bottle and this job tests nothing.
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+
+      # Overlay this PR's formula onto the real tap, so bottle resolution works
+      # exactly as it does for a user (path installs bypass parts of it).
+      - name: Tap and overlay the PR formula
+        run: |
+          brew tap lambdaclass/tap
+          cp Formula/ethrex.rb "$(brew --repository)/Library/Taps/lambdaclass/homebrew-tap/Formula/ethrex.rb"
+
+      - name: Audit
+        run: brew audit --online lambdaclass/tap/ethrex
+
+      - name: Install from bottle only
+        run: brew install --force-bottle lambdaclass/tap/ethrex
+
+      - name: Run the binary and brew test
+        run: |
+          ethrex --version
+          # The installed binary must report the version the formula claims.
+          V="$(brew info --json=v2 lambdaclass/tap/ethrex | jq -r '.formulae[0].versions.stable')"
+          ethrex --version | grep -F "v${V}"
+          brew test lambdaclass/tap/ethrex
+
+  source:
+    name: Build from source
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Tap and overlay the PR formula
+        run: |
+          brew tap lambdaclass/tap
+          cp Formula/ethrex.rb "$(brew --repository)/Library/Taps/lambdaclass/homebrew-tap/Formula/ethrex.rb"
+
+      - name: Install building from source
+        run: brew install --build-from-source lambdaclass/tap/ethrex
+
+      - name: Run the binary and brew test
+        run: |
+          ethrex --version
+          V="$(brew info --json=v2 lambdaclass/tap/ethrex | jq -r '.formulae[0].versions.stable')"
+          ethrex --version | grep -F "v${V}"
+          brew test lambdaclass/tap/ethrex
