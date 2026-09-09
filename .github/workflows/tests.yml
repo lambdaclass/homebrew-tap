@@ -17,8 +17,6 @@ jobs:
       checks: read
       contents: read
       pull-requests: read
-    env:
-      HOMEBREW_NO_SANDBOX_LINUX: 1
     steps:
       - name: Set up Homebrew
         id: set-up-homebrew
@@ -37,7 +35,14 @@ jobs:
 
       - run: brew test-bot --only-setup
 
+      # `brew style` installs shellcheck unconditionally (this tap has no shell
+      # files). On Intel macOS Homebrew no longer ships a gmp bottle, so shellcheck's
+      # gmp dependency builds from source and its upstream tarball host times out
+      # from GitHub runners (~13 min, then FAILED). The Linux job runs the same
+      # syntax and style checks, so the macOS jobs keep the install-and-test coverage
+      # and skip only this step.
       - run: brew test-bot --only-tap-syntax
+        if: runner.os == 'Linux'
       - run: brew test-bot --only-formulae
         if: github.event_name == 'pull_request'
 
