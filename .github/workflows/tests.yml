@@ -17,8 +17,6 @@ jobs:
       checks: read
       contents: read
       pull-requests: read
-    env:
-      HOMEBREW_NO_SANDBOX_LINUX: 1
     steps:
       - name: Set up Homebrew
         id: set-up-homebrew
