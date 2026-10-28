@@ -1,6 +1,6 @@
 cask "stabileo" do
-  version "0.1.0-alpha.1"
-  sha256 "ccaf44b9f84c8e7d077b4ef1e0a93a89a208084960190964c07d703d9e7862a2"
+  version "0.1.0-alpha.3"
+  sha256 "0ebd99df15dcf373d06052493700d9820ff08c42b2c8a8b1ea9ca97756fed35c"
 
   url "https://github.com/lambdaclass/stabileo/releases/download/desktop-v#{version}/Stabileo_#{version}_universal.dmg"
   name "Stabileo"
