@@ -28,6 +28,12 @@ class Ethrex < Formula
 
   def install
     system "rustup", "toolchain", "install", "1.93"
+    # A tarball has no checkout for vergen to read the channel and commit from,
+    # so `--version` would print placeholders for both. Pass the channel a
+    # promoted release reports, and the commit its tag points at (in full, as
+    # ethrex prints it).
+    ENV["VERGEN_GIT_BRANCH"] = "stable"
+    ENV["VERGEN_GIT_SHA"] = "80b774a959c09148012a49f8cc293d9c988d0250"
     system "cargo", "install", *std_cargo_args(path: "cmd/ethrex")
   end
 

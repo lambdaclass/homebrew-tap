@@ -23,9 +23,12 @@ class Ethlambda < Formula
 
   def install
     system "rustup", "toolchain", "install", "1.97.1"
-    # `--version` reports the git branch as its release channel, and a tarball
-    # has no checkout to read one from. vergen takes this override instead.
+    # A tarball has no checkout for vergen to read the channel and commit from,
+    # so `--version` would print placeholders for both. Pass the channel a
+    # promoted release reports, and the commit its tag points at (abbreviated,
+    # as ethlambda prints it).
     ENV["VERGEN_GIT_BRANCH"] = "stable"
+    ENV["VERGEN_GIT_SHA"] = "4244d71"
     system "cargo", "install", *std_cargo_args(path: "bin/ethlambda")
   end
 

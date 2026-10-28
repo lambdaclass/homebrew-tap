@@ -11,7 +11,8 @@ name: Formula CI
 #    which is what every user without a matching bottle (Intel macs, older
 #    macOS) actually runs.
 #
-# Both jobs then run the built binary and `brew test`.
+# Both jobs then run the built binary, check that `--version` reports the
+# formula's version and its tag's commit, and run `brew test`.
 #
 # A pull request tests only the formulas it changes; a change to this workflow,
 # or a manual run, tests all of them.
@@ -76,11 +77,28 @@ jobs:
         run: brew install --force-bottle "lambdaclass/tap/$FORMULA"
 
       - name: Run the binary and brew test
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           "$FORMULA" --version
           # The installed binary must report the version the formula claims.
           V="$(brew info --json=v2 "lambdaclass/tap/$FORMULA" | jq -r '.formulae[0].versions.stable')"
           "$FORMULA" --version | grep -F "v${V}"
+          # ...and the commit its source tag points at. A bottle carries the
+          # release binary's own; a source build gets it from the formula's
+          # VERGEN_GIT_SHA, which every bump has to update.
+          URL="$(brew info --json=v2 "lambdaclass/tap/$FORMULA" | jq -r '.formulae[0].urls.stable.url')"
+          REPO="$(echo "$URL" | sed -E 's|^https://github.com/([^/]+/[^/]+)/archive/refs/tags/.*$|\1|')"
+          TAG="$(echo "$URL" | sed -E 's|^.*/archive/refs/tags/(.*)\.tar\.gz$|\1|')"
+          COMMIT="$(gh api "repos/$REPO/commits/$TAG" --jq .sha)"
+          if ! "$FORMULA" --version | grep -qF "${COMMIT:0:7}"; then
+            echo "::error::$FORMULA --version does not report $TAG's commit $COMMIT"
+            exit 1
+          fi
+          if "$FORMULA" --version | grep -qF VERGEN_IDEMPOTENT_OUTPUT; then
+            echo "::error::$FORMULA --version has a vergen placeholder: set VERGEN_GIT_BRANCH and VERGEN_GIT_SHA"
+            exit 1
+          fi
           brew test "lambdaclass/tap/$FORMULA"
 
   source:
@@ -106,8 +124,22 @@ jobs:
         run: brew install --build-from-source "lambdaclass/tap/$FORMULA"
 
       - name: Run the binary and brew test
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           "$FORMULA" --version
           V="$(brew info --json=v2 "lambdaclass/tap/$FORMULA" | jq -r '.formulae[0].versions.stable')"
           "$FORMULA" --version | grep -F "v${V}"
+          URL="$(brew info --json=v2 "lambdaclass/tap/$FORMULA" | jq -r '.formulae[0].urls.stable.url')"
+          REPO="$(echo "$URL" | sed -E 's|^https://github.com/([^/]+/[^/]+)/archive/refs/tags/.*$|\1|')"
+          TAG="$(echo "$URL" | sed -E 's|^.*/archive/refs/tags/(.*)\.tar\.gz$|\1|')"
+          COMMIT="$(gh api "repos/$REPO/commits/$TAG" --jq .sha)"
+          if ! "$FORMULA" --version | grep -qF "${COMMIT:0:7}"; then
+            echo "::error::$FORMULA --version does not report $TAG's commit $COMMIT: update VERGEN_GIT_SHA in Formula/$FORMULA.rb"
+            exit 1
+          fi
+          if "$FORMULA" --version | grep -qF VERGEN_IDEMPOTENT_OUTPUT; then
+            echo "::error::$FORMULA --version has a vergen placeholder: set VERGEN_GIT_BRANCH and VERGEN_GIT_SHA"
+            exit 1
+          fi
           brew test "lambdaclass/tap/$FORMULA"
