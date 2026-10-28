@@ -2,14 +2,13 @@ cask "stabileo" do
   version "0.1.0-alpha.1"
   sha256 "ccaf44b9f84c8e7d077b4ef1e0a93a89a208084960190964c07d703d9e7862a2"
 
-  url "https://github.com/lambdaclass/stabileo/releases/download/desktop-v#{version}/Stabileo_#{version}_universal.dmg",
-      verified: "github.com/lambdaclass/stabileo/"
+  url "https://github.com/lambdaclass/stabileo/releases/download/desktop-v#{version}/Stabileo_#{version}_universal.dmg"
   name "Stabileo"
   desc "Structural analysis of 2D and 3D frames and trusses"
   homepage "https://stabileo.com/"
 
   auto_updates true
-  depends_on macos: ">= :big_sur"
+  depends_on macos: :big_sur
 
   app "Stabileo.app"
 
