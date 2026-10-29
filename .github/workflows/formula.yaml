@@ -1,6 +1,6 @@
 name: Formula CI
 
-# Installs the formula the two ways a user can hit it, so a broken release is
+# Installs each formula the two ways a user can hit it, so a broken release is
 # caught on the bump PR instead of by the first person to `brew upgrade`:
 #
 #  - from the bottle (--force-bottle): fails if the bottle URL 404s — i.e. the
@@ -12,17 +12,53 @@ name: Formula CI
 #    macOS) actually runs.
 #
 # Both jobs then run the built binary and `brew test`.
+#
+# A pull request tests only the formulas it changes; a change to this workflow,
+# or a manual run, tests all of them.
 
 on:
   pull_request:
   workflow_dispatch:
 
 jobs:
+  select:
+    name: Select formulas
+    runs-on: ubuntu-24.04
+    outputs:
+      formulas: ${{ steps.select.outputs.formulas }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: List the formulas to test
+        id: select
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          if [ -z "$BASE_SHA" ] || git diff --name-only "$BASE_SHA" HEAD | grep -qx '.github/workflows/formula.yaml'; then
+            files="$(ls Formula/*.rb)"
+          else
+            # Deleted formulas have nothing left to install.
+            files="$(git diff --name-only --diff-filter=d "$BASE_SHA" HEAD -- 'Formula/*.rb')"
+          fi
+          formulas="$(printf '%s\n' "$files" | sed -n 's|^Formula/\(.*\)\.rb$|\1|p' | jq -Rsc 'split("\n") | map(select(length > 0))')"
+          echo "formulas=$formulas" >> "$GITHUB_OUTPUT"
+          echo "Testing: $formulas"
+
   bottle:
-    name: Install from bottle
+    name: Install ${{ matrix.formula }} from bottle
+    needs: select
+    if: needs.select.outputs.formulas != '[]'
+    strategy:
+      fail-fast: false
+      matrix:
+        formula: ${{ fromJSON(needs.select.outputs.formulas) }}
     # arm64 + Sonoma: must match the formula's `arm64_sonoma` bottle tag, or
     # brew refuses the bottle and this job tests nothing.
     runs-on: macos-14
+    env:
+      FORMULA: ${{ matrix.formula }}
     steps:
       - uses: actions/checkout@v4
 
@@ -31,39 +67,47 @@ jobs:
       - name: Tap and overlay the PR formula
         run: |
           brew tap lambdaclass/tap
-          cp Formula/ethrex.rb "$(brew --repository)/Library/Taps/lambdaclass/homebrew-tap/Formula/ethrex.rb"
+          cp "Formula/$FORMULA.rb" "$(brew --repository)/Library/Taps/lambdaclass/homebrew-tap/Formula/$FORMULA.rb"
 
       - name: Audit
-        run: brew audit --online lambdaclass/tap/ethrex
+        run: brew audit --online "lambdaclass/tap/$FORMULA"
 
       - name: Install from bottle only
-        run: brew install --force-bottle lambdaclass/tap/ethrex
+        run: brew install --force-bottle "lambdaclass/tap/$FORMULA"
 
       - name: Run the binary and brew test
         run: |
-          ethrex --version
+          "$FORMULA" --version
           # The installed binary must report the version the formula claims.
-          V="$(brew info --json=v2 lambdaclass/tap/ethrex | jq -r '.formulae[0].versions.stable')"
-          ethrex --version | grep -F "v${V}"
-          brew test lambdaclass/tap/ethrex
+          V="$(brew info --json=v2 "lambdaclass/tap/$FORMULA" | jq -r '.formulae[0].versions.stable')"
+          "$FORMULA" --version | grep -F "v${V}"
+          brew test "lambdaclass/tap/$FORMULA"
 
   source:
-    name: Build from source
+    name: Build ${{ matrix.formula }} from source
+    needs: select
+    if: needs.select.outputs.formulas != '[]'
+    strategy:
+      fail-fast: false
+      matrix:
+        formula: ${{ fromJSON(needs.select.outputs.formulas) }}
     runs-on: macos-14
+    env:
+      FORMULA: ${{ matrix.formula }}
     steps:
       - uses: actions/checkout@v4
 
       - name: Tap and overlay the PR formula
         run: |
           brew tap lambdaclass/tap
-          cp Formula/ethrex.rb "$(brew --repository)/Library/Taps/lambdaclass/homebrew-tap/Formula/ethrex.rb"
+          cp "Formula/$FORMULA.rb" "$(brew --repository)/Library/Taps/lambdaclass/homebrew-tap/Formula/$FORMULA.rb"
 
       - name: Install building from source
-        run: brew install --build-from-source lambdaclass/tap/ethrex
+        run: brew install --build-from-source "lambdaclass/tap/$FORMULA"
 
       - name: Run the binary and brew test
         run: |
-          ethrex --version
-          V="$(brew info --json=v2 lambdaclass/tap/ethrex | jq -r '.formulae[0].versions.stable')"
-          ethrex --version | grep -F "v${V}"
-          brew test lambdaclass/tap/ethrex
+          "$FORMULA" --version
+          V="$(brew info --json=v2 "lambdaclass/tap/$FORMULA" | jq -r '.formulae[0].versions.stable')"
+          "$FORMULA" --version | grep -F "v${V}"
+          brew test "lambdaclass/tap/$FORMULA"
