@@ -1,5 +1,5 @@
 class Ethlambda < Formula
-  desc "Minimalist Beacon Chain and Lean Chain client written in Rust"
+  desc "Beacon Chain and Lean Chain client in Rust, with ethrex embedded"
   homepage "https://docs.ethlambda.xyz/"
   url "https://github.com/lambdaclass/ethlambda/archive/refs/tags/v1.0.0.tar.gz"
   sha256 "07dbaba9fa48806cbcdc2bc32cc208c9355bb65ca60714fa1866ed8d9f2eadd3"
@@ -21,15 +21,24 @@ class Ethlambda < Formula
   # ships it with the Command Line Tools; Linux takes it from `llvm`.
   uses_from_macos "llvm" => :build
 
+  # Both formulas install a binary named `ethlambda`: this one with ethrex,
+  # `ethlambda-minimal` without it.
+  conflicts_with "ethlambda-minimal", because: "both install an `ethlambda` binary"
+
   def install
     system "rustup", "toolchain", "install", "1.97.1"
     # `--version` reports the git branch as its release channel, and a tarball
     # has no checkout to read one from. vergen takes this override instead.
     ENV["VERGEN_GIT_BRANCH"] = "stable"
-    system "cargo", "install", *std_cargo_args(path: "bin/ethlambda")
+    # ethrex embedded as the beacon node's execution client, as in the
+    # `ethlambda-macos-aarch64` release binary the bottle is repackaged from:
+    # a source install and the bottle must be the same build.
+    system "cargo", "install", "--features", "include-ethrex", *std_cargo_args(path: "bin/ethlambda")
   end
 
   test do
     assert_match "ethlambda/v#{version}-", shell_output("#{bin}/ethlambda --version")
+    # Only a build with ethrex embedded takes the `--ethrex.*` flags.
+    assert_match "--ethrex.", shell_output("#{bin}/ethlambda beacon --help")
   end
 end
