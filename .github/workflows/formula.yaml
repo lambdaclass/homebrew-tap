@@ -77,10 +77,13 @@ jobs:
 
       - name: Run the binary and brew test
         run: |
-          "$FORMULA" --version
+          # A formula's binary has the formula's name, except a `-minimal`
+          # variant's: `ethlambda-minimal` installs `ethlambda`.
+          BIN="${FORMULA%-minimal}"
+          "$BIN" --version
           # The installed binary must report the version the formula claims.
           V="$(brew info --json=v2 "lambdaclass/tap/$FORMULA" | jq -r '.formulae[0].versions.stable')"
-          "$FORMULA" --version | grep -F "v${V}"
+          "$BIN" --version | grep -F "v${V}"
           brew test "lambdaclass/tap/$FORMULA"
 
   source:
@@ -107,7 +110,9 @@ jobs:
 
       - name: Run the binary and brew test
         run: |
-          "$FORMULA" --version
+          # See the bottle job: `ethlambda-minimal` installs `ethlambda`.
+          BIN="${FORMULA%-minimal}"
+          "$BIN" --version
           V="$(brew info --json=v2 "lambdaclass/tap/$FORMULA" | jq -r '.formulae[0].versions.stable')"
-          "$FORMULA" --version | grep -F "v${V}"
+          "$BIN" --version | grep -F "v${V}"
           brew test "lambdaclass/tap/$FORMULA"
