@@ -68,6 +68,8 @@ jobs:
       - name: Tap and overlay the PR formula
         run: |
           brew tap lambdaclass/tap
+          # brew refuses to load a formula from a tap it was not told to trust.
+          brew trust lambdaclass/tap
           cp "Formula/$FORMULA.rb" "$(brew --repository)/Library/Taps/lambdaclass/homebrew-tap/Formula/$FORMULA.rb"
 
       - name: Audit
@@ -101,6 +103,8 @@ jobs:
       - name: Tap and overlay the PR formula
         run: |
           brew tap lambdaclass/tap
+          # brew refuses to load a formula from a tap it was not told to trust.
+          brew trust lambdaclass/tap
           cp "Formula/$FORMULA.rb" "$(brew --repository)/Library/Taps/lambdaclass/homebrew-tap/Formula/$FORMULA.rb"
 
       - name: Install building from source
