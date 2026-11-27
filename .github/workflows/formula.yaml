@@ -54,9 +54,10 @@ jobs:
       fail-fast: false
       matrix:
         formula: ${{ fromJSON(needs.select.outputs.formulas) }}
-    # arm64 + Sonoma: must match the formula's `arm64_sonoma` bottle tag, or
-    # brew refuses the bottle and this job tests nothing.
-    runs-on: macos-14
+    # arm64, on the oldest macOS GitHub still hosts (macos-14 is retired). brew
+    # installs an `arm64_sonoma` bottle on Sonoma or newer and refuses it on
+    # Intel, where this job would test nothing.
+    runs-on: macos-15
     env:
       FORMULA: ${{ matrix.formula }}
     steps:
@@ -91,7 +92,7 @@ jobs:
       fail-fast: false
       matrix:
         formula: ${{ fromJSON(needs.select.outputs.formulas) }}
-    runs-on: macos-14
+    runs-on: macos-15
     env:
       FORMULA: ${{ matrix.formula }}
     steps:
